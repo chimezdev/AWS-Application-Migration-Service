@@ -73,6 +73,7 @@ In this lab we will be replicating client application on equinix(on-prem) to tar
     ```
         AmazonSSMFullAccess
         AmazonSSMManagedInstanceCore
+        AmazonEC2RoleforSSM
         AmazonSSMManagedEC2InstanceDefaultPolicy
     ```
     - On the EC2 console select the newly created role and click to create instance
@@ -83,9 +84,37 @@ In this lab we will be replicating client application on equinix(on-prem) to tar
     ```
         Invoke-WebRequest -Uri "https://aws-application-migration-service-us-east-1.s3.us-east-1.amazonaws.com/latest/windows/AwsReplicationWindowsInstaller.exe" -OutFile ".\AwsReplicationWindowsInstaller.exe"
     ```
-    - cd to the **Users** directory by first going to the home directory and run the command you copied to download the installer
+    - Do `cd /` followed by `cd Users` to navigate to the user directory.
     - after the installation run this command copied from step 5. of the MGN agent installation window.
     ```
-        .\AwsReplicationWindowsInstaller.exe --region us-east-1 --aws-access-key-id AKIA5MCMJQJ3SFGQPSN7 --aws-secret-access-key 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 --no-prompt
+        .\AwsReplicationWindowsInstaller.exe --region us-east-1 --aws-access-key-id <access-key> --aws-secret-access-key <secret-access-key> --no-prompt
     ```
+    ![Agent installation](./images/install-agent.png)
     - after installation go back to MGN console and notice a source server has been discovered.
+    ![source server](./images/source-server.png)
+    - the source server will now go through a lifecycle from through cutover as seen on server detail page.
+    ![Replication server lounched successfully](./images/rep-server.png)
+
+6. Step 5: Configuring the launch settings
+    - It comprises of the **General launch settings** and EC2 Launch Template that will determine how a test and cutover instance will be launched for each source server in AWS.
+    - Click on the **IIS-Server** and select the *Launch settings* table
+    - edit and turn off **Instance type right sizing**, then save
+    - Click on *modify* just beside ***EC2 Launch Template*** 
+    - select **t3.small** as instance type and save.
+    - NB: Application Migration Service always uses the "Default" version of the EC2 Launch Template. To set the modified template as default;
+    - select the launch template, click **Actions -> Set default version**. Select the version of the template you want to make default and save. 
+
+7. Step 6: Launching a test instance
+    - Ensure that the source server lifecycle says *'Ready for testing'* and *'Data replication status'* says **Healthy**
+    - Select the source server, click on **Test and cutover -> Launch test instances** 
+    - confirm the launch
+    ![Launched test instance](./images/test-inst.png)
+    - visit **Launch history** page to see the jop
+    - You may get the following error 
+    ```Error: An error occurred (UnauthorizedOperation) when calling the RunInstances operation: You are not authorized to perform this operation. Encoded authorization failure message <message error>
+    ```
+- Troubleshooting time
+    - This error indicates we do not have a required permission. To get more insight, we need to decode the encoded error message.
+    - Go to your terminal with aws cli v2 installed and configured
+    - run the command with the error code `aws sts decode-authorization-message --encoded-message <encoded-message>`
+iam:UpdateAccessKey
