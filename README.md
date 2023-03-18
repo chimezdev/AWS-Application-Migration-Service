@@ -76,6 +76,16 @@ In this lab we will be replicating client application on equinix(on-prem) to tar
         AmazonSSMManagedEC2InstanceDefaultPolicy
     ```
     - On the EC2 console select the newly created role and click to create instance
-    - Back to the MGN Console click on **Add servers** to download the agent installer
+
+    - Back to the MGN Console click on **Add servers**
     - select *windows* provide the IAM access key ID and Secret access key ID of the user we created earlier.
-    
+    - copy the following download command, go to the EC2 console, connect to the instance using SSM
+    ```
+        Invoke-WebRequest -Uri "https://aws-application-migration-service-us-east-1.s3.us-east-1.amazonaws.com/latest/windows/AwsReplicationWindowsInstaller.exe" -OutFile ".\AwsReplicationWindowsInstaller.exe"
+    ```
+    - cd to the **Users** directory by first going to the home directory and run the command you copied to download the installer
+    - after the installation run this command copied from step 5. of the MGN agent installation window.
+    ```
+        .\AwsReplicationWindowsInstaller.exe --region us-east-1 --aws-access-key-id AKIA5MCMJQJ3SFGQPSN7 --aws-secret-access-key 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 --no-prompt
+    ```
+    - after installation go back to MGN console and notice a source server has been discovered.
